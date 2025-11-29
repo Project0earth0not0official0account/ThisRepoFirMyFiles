@@ -1,0 +1,88 @@
+<!DOCTYPE html><html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IP Информация + Пинг</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0f0f0f;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: #1c1c1c;
+            padding: 25px;
+            border-radius: 16px;
+            width: 350px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+            text-align: center;
+        }
+        h2 {
+            margin-top: 0;
+        }
+        .btn {
+            background: #0077ff;
+            border: none;
+            padding: 12px 20px;
+            margin-top: 15px;
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .btn:hover {
+            background: #005fd1;
+        }
+        .info-block {
+            background: #262626;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            text-align: left;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body><div class="card">
+    <h2>IP Информация</h2><div class="info-block" id="info">Получаю данные...</div>
+
+<button class="btn" onclick="loadData()">Обновить</button>
+
+</div><script>
+async function loadData() {
+    document.getElementById('info').innerText = "Обновление...";
+
+    try {
+        const res = await fetch("https://api.myip.com");
+        const data = await res.json();
+
+        // Пинг
+        let pingResult = "";
+        const start = performance.now();
+        try {
+            await fetch("https://8.8.8.8", {mode: 'no-cors'});
+            const end = performance.now();
+            pingResult = Math.round(end - start) + " ms";
+        } catch {
+            pingResult = "Недоступен";
+        }
+
+        document.getElementById('info').innerHTML = `
+            <b>IP:</b> ${data.ip}<br>
+            <b>Страна:</b> ${data.country}<br>
+            <b>Регион (код):</b> ${data.cc}<br><br>
+            <b>Пинг Google DNS:</b> ${pingResult}
+        `;
+    } catch (e) {
+        document.getElementById('info').innerText = "Ошибка загрузки данных";
+    }
+}
+
+loadData();
+</script></body>
+</html>
