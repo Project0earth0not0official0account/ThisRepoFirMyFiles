@@ -48,41 +48,49 @@
         }
     </style>
 </head>
-<body><div class="card">
-    <h2>IP Информация</h2><div class="info-block" id="info">Получаю данные...</div>
+<body>
+<div class="card">
+    <h2>IP Информация</h2>
+    <div class="info-block" id="info">Получаю данные...</div>
+    <button class="btn" onclick="loadData()">Обновить</button>
+</div>
 
-<button class="btn" onclick="loadData()">Обновить</button>
-
-</div><script>
+<script>
 async function loadData() {
-    document.getElementById('info').innerText = "Обновление...";
+    const info = document.getElementById('info');
+    info.innerText = "Обновление...";
 
     try {
         const res = await fetch("https://api.myip.com");
         const data = await res.json();
 
-        // Пинг
-        let pingResult = "";
+        // ---- ПИНГ ЧЕРЕЗ КАРТИНКУ ----
         const start = performance.now();
-        try {
-            await fetch("https://8.8.8.8", {mode: 'no-cors'});
-            const end = performance.now();
-            pingResult = Math.round(end - start) + " ms";
-        } catch {
-            pingResult = "Недоступен";
-        }
+        const img = new Image();
 
-        document.getElementById('info').innerHTML = `
+        const pingPromise = new Promise(resolve => {
+            img.onload = () => resolve(performance.now() - start);
+            img.onerror = () => resolve(null);
+        });
+
+        // используем google.com/favicon.ico (есть всегда, маленький файл)
+        img.src = "https://www.google.com/favicon.ico?" + Math.random();
+
+        const ping = await pingPromise;
+        const pingText = ping ? Math.round(ping) + " ms" : "Недоступен";
+
+        info.innerHTML = `
             <b>IP:</b> ${data.ip}<br>
             <b>Страна:</b> ${data.country}<br>
             <b>Регион (код):</b> ${data.cc}<br><br>
-            <b>Пинг Google DNS:</b> ${pingResult}
+            <b>Пинг Google:</b> ${pingText}
         `;
     } catch (e) {
-        document.getElementById('info').innerText = "Ошибка загрузки данных";
+        info.innerText = "Ошибка загрузки данных";
     }
 }
 
 loadData();
-</script></body>
+</script>
+</body>
 </html>
